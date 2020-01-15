@@ -40,10 +40,47 @@ module.exports = {
         return response.json(dev);
     },
     //DESAFIOOOO
-    async update(){
+    async update(request, response){
+        const  { _id, techs, latitude, longitude } = request.body;
 
+        const techsArray = await parseStringAsArray(techs);
+
+        const dev = await Dev.findById({_id}, error =>{
+            if(error){
+                return response.json({
+                    message: "Esse Dev não existe ou está inativo!"
+                })
+            }
+        })
+
+        dev.techs = techsArray;
+        dev.location.coordinates = [longitude, latitude]; 
+
+        await dev.save();
+
+        return response.json(dev);
     },
-    async destroy(){
+    async destroy(request, response){
+        const _id = request.params.id
 
+        // await Dev.findOne({ _id }, error =>{
+        //     if(error){
+        //         return response.json({ 
+        //             message: "Esse Dev não existe ou está inativo!"
+        //         });
+        //     }
+        // })
+
+        await Dev.deleteOne({ _id }, (error) =>{
+            if(error) return response.json({
+                message: `Não foi possível deletar o ${_id}!`
+            })
+
+            console.log(_id + " deletado do banco de dados!")
+        })
+
+        return response.json({
+            message: `${_id} deletado com sucesso!` 
+        });
     },
 }
